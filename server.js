@@ -151,5 +151,55 @@ app.post('/api/brief', async (req, res) => {
   }
 });
 
+// Natural-language Q&A over the case file, for the AI case assistant
+app.post('/api/ask', async (req, res) => {
+  try {
+    const { question, documents, history } = req.body || {};
+    const q = (question || '').trim();
+    if (!q) return res.status(400).json({ error: 'No question provided.' });
+
+    const caseContext = documents && documents.length
+      ? documents
+          .map((x, i) => {
+            return (
+              '[Doc ' + (i + 1) + '] ' + (x.docType || 'Document') + ' — ' + (x.title || '') + ' (' + (x.date || 'undated') + ')\n' +
+              'Parties: ' + (x.parties || []).join(', ') + '\n' +
+              'Summary: ' + (x.summary || '') + '\n' +
+              'Key facts: ' + (x.keyFacts || []).join('; ') + '\n' +
+              'Flags: ' + ((x.flags || []).join('; ') || 'none')
+            );
+          })
+          .join('\n\n')
+      : null;
+
+    const instructions = caseContext
+      ? 'You are a helpful legal case assistant. Answer the question using the case information below when relevant. Be specific, concise, and reference case details when useful.\n\nCase Information:\n' + caseContext
+      : 'You are a helpful legal assistant. No case documents have been uploaded yet, so answer general legal questions helpfully and concisely. If the question needs specific case facts, mention that uploading case documents would help.';
+
+    const priorTurns = Array.isArray(history)
+      ? history.filter((h) => h && (h.role === 'user' || h.role === 'assistant') && h.content)
+      : [];
+
+    let messages;
+    if (priorTurns.length === 0) {
+      messages = [{ role: 'user', content: instructions + '\n\nQuestion: ' + q }];
+    } else {
+      const turns = priorTurns.slice();
+      if (turns[0].role === 'user') {
+        turns[0] = { role: 'user', content: instructions + '\n\n' + turns[0].content };
+      } else {
+        turns.unshift({ role: 'user', content: instructions });
+      }
+      messages = turns.concat([{ role: 'user', content: q }]);
+    }
+
+    const data = await callClaude(messages, 1024);
+    res.json({ text: textFrom(data) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Loom AI backend running at http://localhost:' + PORT));

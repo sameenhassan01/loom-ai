@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 
   :root {
@@ -33,7 +34,7 @@
   ::selection { background: var(--accent); color: var(--accent-ink); }
   a { color: inherit; }
 
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px 70px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 70px; }
 
   /* ---------- HEADER / HERO ---------- */
 
@@ -41,7 +42,7 @@
   .mark { display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
   .mark svg { width: 20px; height: 20px; flex-shrink: 0; }
 
-  .hero { position: relative; padding: 60px 0 70px; max-width: 720px; overflow: visible; }
+  .hero { position: relative; padding: 48px 0 56px; max-width: 720px; overflow: visible; }
 
   .line-bg {
     position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
@@ -61,7 +62,7 @@
   @keyframes lineDrift { from { background-position: 0% 0%; } to { background-position: 100% 140%; } }
   @media (prefers-reduced-motion: reduce) { .line-bg { animation: none; } }
 
-  .hero > .eyebrow, .hero > h1, .hero > p.lede, .hero > .hero-cta, .hero > .case-field { position: relative; z-index: 1; }
+  .hero > .eyebrow, .hero > h1, .hero > p.lede, .hero > .hero-cta { position: relative; z-index: 1; }
 
   .eyebrow {
     font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em;
@@ -82,26 +83,17 @@
   .hero-cta svg { width: 14px; height: 14px; transition: transform 0.15s ease; }
   .hero-cta:hover svg { transform: translateY(2px); }
 
-  .case-field {
-    display: flex; align-items: center; gap: 10px; margin-top: 34px;
-    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--ink-faint);
-  }
-  .case-field input {
-    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--ink-muted);
-    background: transparent; border: none; border-bottom: 1px dashed var(--border-strong);
-    padding: 3px 2px; min-width: 220px;
-  }
-  .case-field input:focus { outline: none; border-bottom-color: var(--accent); color: var(--ink); }
-
   /* ---------- LAYOUT ---------- */
 
   .layout {
     display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start;
-    border-top: 1px solid var(--border); padding-top: 40px;
+    border-top: 1px solid var(--border); padding-top: 36px;
   }
   @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
 
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .right-panels { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
   .panel-head {
     padding: 16px 20px; border-bottom: 1px solid var(--border);
     display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
@@ -113,14 +105,16 @@
 
   .dropzone {
     margin: 16px 20px 6px; border: 1.5px dashed var(--border-strong); border-radius: 6px;
-    padding: 22px 16px; text-align: center; cursor: pointer; background: var(--surface-sunken);
-    transition: border-color 0.15s ease, background 0.15s ease; display: block;
+    padding: 20px 16px; text-align: center; cursor: pointer; background: var(--surface-sunken);
+    transition: border-color 0.15s ease, background 0.15s ease; display: block; width: calc(100% - 40px);
+    font-family: inherit; color: inherit;
   }
   .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: #0A1638; }
-  .dropzone svg { width: 24px; height: 24px; margin-bottom: 8px; opacity: 0.55; }
-  .dropzone p { margin: 0; font-size: 0.86rem; color: var(--ink-muted); }
+  .dropzone svg { width: 22px; height: 22px; margin-bottom: 8px; opacity: 0.55; }
+  .dropzone p { margin: 0; font-size: 0.85rem; color: var(--ink-muted); }
   .dropzone p.primary { color: var(--ink); font-weight: 500; margin-bottom: 3px; }
-  .dropzone input { display: none; }
+
+  #fileInput, #cameraInput { display: none; }
 
   .paste-row { margin: 4px 20px 16px; }
   .paste-row summary { font-size: 0.82rem; color: var(--ink-muted); cursor: pointer; padding: 6px 0; list-style: none; }
@@ -135,6 +129,16 @@
   }
   .paste-row textarea:focus { outline: none; border-color: var(--accent); }
   .paste-row .btn { margin-top: 8px; }
+
+  .invite-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin: 14px 20px 0; padding: 10px 14px; border-radius: 6px; cursor: pointer;
+    background: transparent; border: 1px dashed var(--border-strong); color: var(--ink-muted);
+    font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 500; width: calc(100% - 40px);
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+  .invite-btn:hover { border-color: var(--accent); color: var(--ink); background: var(--surface-sunken); }
+  .invite-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   .doc-list { padding: 6px 12px 16px; display: grid; gap: 10px; }
 
@@ -151,7 +155,7 @@
   .doc-thumb.placeholder svg { width: 18px; height: 18px; opacity: 0.4; }
 
   .doc-main { min-width: 0; }
-  .doc-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .doc-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
   .doc-type-badge {
     font-family: 'Space Mono', monospace; font-size: 0.66rem; color: var(--accent);
     border: 1px solid var(--border-strong); border-radius: 3px; padding: 1px 6px; white-space: nowrap;
@@ -197,6 +201,7 @@
     background: var(--ink); color: var(--accent-ink); border: none;
   }
   .btn.ghost { background: transparent; color: var(--ink-muted); border: 1px solid var(--border-strong); }
+  .btn.stop { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn:focus-visible, .dropzone:focus-visible, .hero-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -206,11 +211,161 @@
   }
   .banner.warn { border-color: var(--flag); color: var(--flag); background: var(--flag-bg); }
 
+  /* ---------- TIMELINE ---------- */
+
+  .timeline-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .timeline-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .timeline-head h2 { font-weight: 600; font-size: 1rem; margin: 0; }
+  .timeline-body { padding: 16px 20px; }
+  .timeline-empty { color: var(--ink-faint); font-size: 0.85rem; }
+  .timeline-items { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .timeline-content { min-width: 0; flex: 1; }
+  .timeline-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+  .timeline-date { font-size: 0.8rem; color: var(--ink-muted); font-family: 'Space Mono', monospace; font-weight: 600; }
+  .timeline-days { font-size: 0.75rem; color: var(--good); font-weight: 600; }
+  .timeline-doc { font-size: 0.75rem; color: var(--ink-faint); display: inline-block; background: var(--surface-sunken); padding: 1px 6px; border-radius: 3px; margin-bottom: 6px; }
+  .timeline-text { font-size: 0.85rem; color: var(--ink-muted); line-height: 1.4; }
+  .timeline-time { font-size: 0.75rem; color: var(--ink-faint); margin-bottom: 4px; }
+
+  .timeline-add-btn { background: transparent; border: none; color: var(--accent); cursor: pointer; padding: 0; font-size: 1.1rem; line-height: 1; }
+  .timeline-add-btn:hover { opacity: 0.8; }
+
+  /* ---------- MODALS (shared) ---------- */
+
+  .modal-overlay, #timelineFormModal, #inviteModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open, #timelineFormModal.open, #inviteModal.open { display: flex; }
+  .modal-box, .timeline-form-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; max-width: 380px; width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal-box h3, .timeline-form-box h3 { margin: 0 0 16px; font-size: 1.1rem; font-weight: 600; }
+  .modal-box p { margin: 0 0 20px; font-size: 0.9rem; color: var(--ink-muted); }
+  .modal-options { display: grid; gap: 10px; }
+  .modal-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-sunken); cursor: pointer; text-align: left; color: inherit; font-size: 0.9rem; transition: all 0.15s ease; width: 100%; font-family: inherit; }
+  .modal-btn:hover { background: var(--bg-raise); border-color: var(--accent); }
+  .modal-btn svg { width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7; }
+  .modal-btn strong { display: block; font-weight: 600; margin-bottom: 2px; }
+  .modal-btn span { font-size: 0.8rem; color: var(--ink-faint); }
+
+  video#cameraPreview { width: 100%; border-radius: 6px; margin-bottom: 12px; background: black; }
+  .camera-controls { display: flex; gap: 8px; }
+  .camera-controls button { flex: 1; }
+  #cameraContent { display: none; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 5px; font-weight: 500; }
+  .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; background: var(--surface-sunken); border: 1px solid var(--border); border-radius: 5px; color: var(--ink); font-family: 'Inter', sans-serif; font-size: 0.85rem; }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+  .form-group textarea { min-height: 70px; resize: vertical; }
+  .form-actions { display: flex; gap: 8px; }
+  .form-actions button { flex: 1; }
+
+  .invite-form-box .form-group textarea { min-height: 90px; }
+  .invite-link-row { display: flex; gap: 8px; margin-top: 4px; }
+  .invite-link-row input { flex: 1; font-size: 0.78rem; font-family: 'Space Mono', monospace; }
+  .invite-link-row button { flex-shrink: 0; }
+  .invite-channels { display: flex; gap: 8px; }
+  .invite-channels button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .invite-channels svg { width: 15px; height: 15px; }
+  .invite-note { font-size: 0.76rem; color: var(--ink-faint); margin: 10px 0 0; line-height: 1.4; }
+
   footer {
-    padding: 34px 0 10px; color: var(--ink-faint); font-size: 0.76rem;
+    padding: 30px 0 10px; color: var(--ink-faint); font-size: 0.76rem;
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
     font-family: 'Space Mono', monospace;
   }
+
+  /* ---------- Floating chat widget ---------- */
+
+  .chat-fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 900;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 999px;
+    padding: 14px 20px 14px 14px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.88rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    animation: fabFloat 3s ease-in-out infinite;
+  }
+  .chat-fab:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.45); animation-play-state: paused; }
+  .chat-fab::before {
+    content: ""; position: absolute; inset: 0; border-radius: 999px;
+    box-shadow: 0 0 0 0 rgba(244,247,252,0.5);
+    animation: fabPulse 2.4s ease-out infinite;
+    pointer-events: none;
+  }
+  .chat-fab svg { width: 24px; height: 24px; flex-shrink: 0; position: relative; }
+  .chat-fab .chat-fab-label { position: relative; }
+  .chat-fab.hidden { display: none; }
+  @keyframes fabFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @keyframes fabPulse {
+    0% { box-shadow: 0 0 0 0 rgba(244,247,252,0.45); }
+    70% { box-shadow: 0 0 0 14px rgba(244,247,252,0); }
+    100% { box-shadow: 0 0 0 0 rgba(244,247,252,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .chat-fab, .chat-fab::before { animation: none; } }
+  @media (max-width: 560px) {
+    .chat-fab { padding: 14px; }
+    .chat-fab .chat-fab-label { display: none; }
+  }
+
+  .chat-window {
+    position: fixed; bottom: 24px; right: 24px; z-index: 950;
+    width: 360px; max-width: calc(100vw - 32px); height: 520px; max-height: calc(100vh - 48px);
+    background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px;
+    display: none; flex-direction: column; overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    animation: chatPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .chat-window.open { display: flex; }
+  @keyframes chatPop { from { opacity: 0; transform: translateY(24px) scale(0.92); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .chat-window { animation: none; } }
+
+  .chat-header {
+    display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    background: linear-gradient(135deg, var(--bg-raise) 0%, var(--surface) 100%);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .chat-header .chat-avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative;
+  }
+  .chat-header .chat-avatar::after {
+    content: ""; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px;
+    background: var(--good); border: 2px solid var(--bg-raise); border-radius: 50%;
+  }
+  .chat-header .chat-avatar svg { width: 18px; height: 18px; }
+  .chat-header-text { flex: 1; min-width: 0; }
+  .chat-header-text strong { display: block; font-size: 0.9rem; font-weight: 600; }
+  .chat-header-text span { display: block; font-size: 0.72rem; color: var(--ink-faint); }
+  .chat-close { background: none; border: none; color: var(--ink-muted); cursor: pointer; padding: 6px; line-height: 1; border-radius: 50%; transition: background 0.15s ease, color 0.15s ease; }
+  .chat-close svg { width: 18px; height: 18px; display: block; }
+  .chat-close:hover { color: var(--ink); background: rgba(255,255,255,0.08); }
+
+  .assistant-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; overflow: hidden; background: var(--surface-sunken); }
+  .assistant-messages { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
+  .assistant-message { padding: 10px 13px; border-radius: 14px; font-size: 0.85rem; line-height: 1.45; word-wrap: break-word; max-width: 85%; animation: msgIn 0.22s ease; }
+  .assistant-message.user { background: var(--accent); color: var(--accent-ink); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .assistant-message.ai { background: var(--surface); border: 1px solid var(--border); color: var(--ink-muted); align-self: flex-start; border-bottom-left-radius: 4px; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .typing-dots { display: flex; gap: 4px; align-self: flex-start; background: var(--surface); border: 1px solid var(--border); padding: 12px 14px; border-radius: 14px; border-bottom-left-radius: 4px; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); animation: typingBounce 1.2s infinite ease-in-out; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  .assistant-input-box { display: flex; gap: 8px; flex-shrink: 0; }
+  .assistant-input { flex: 1; padding: 11px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; color: var(--ink); font-family: 'Inter', sans-serif; font-size: 0.85rem; transition: border-color 0.15s ease; }
+  .assistant-input:focus { outline: none; border-color: var(--accent); }
+  .assistant-send {
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 50%;
+    width: 40px; height: 40px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform 0.12s ease;
+  }
+  .assistant-send svg { width: 17px; height: 17px; }
+  .assistant-send:hover:not(:disabled) { transform: scale(1.08); }
+  .assistant-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .assistant-empty { color: var(--ink-faint); font-size: 0.85rem; text-align: center; padding: 40px 14px; line-height: 1.5; }
 
 </style>
 </head>
@@ -228,11 +383,9 @@
     <div class="line-bg" aria-hidden="true"></div>
     <div class="eyebrow">AI-powered intake</div>
     <h1>Read every case at the speed of AI.</h1>
-    <p class="lede">Upload a document — photo or PDF — and Loom AI reads it, files it, and rewrites the case brief, so you walk into the room already knowing where the matter stands.</p>
+    <p class="lede">Upload a document — photo, PDF, or Word file — and Loom AI reads it, files it, and rewrites the case brief, so you walk into the room already knowing where the matter stands.</p>
     <button class="hero-cta" id="heroCta">Start a case <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button>
-    <div class="case-field">
-      matter&nbsp;/&nbsp;<input id="caseName" type="text" value="Untitled matter" spellcheck="false">
-    </div>
+    <input id="caseName" type="text" value="Untitled matter" spellcheck="false" style="display:none;">
   </section>
 
   <div class="layout" id="demo">
@@ -243,34 +396,53 @@
         <span class="count" id="docCount">0 documents</span>
       </div>
 
-      <label class="dropzone" id="dropzone" tabindex="0">
+      <button class="dropzone" id="dropzone" tabindex="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
         <p class="primary">Add a document</p>
-        <p>Drop a photo or PDF, or click to choose one</p>
-        <input id="fileInput" type="file" accept="image/*,application/pdf" multiple>
-      </label>
+        <p>Click to upload, take a photo, or paste text</p>
+      </button>
+      <input id="fileInput" type="file" accept="image/*,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple>
+      <input id="cameraInput" type="file" accept="image/*" capture="environment">
 
       <details class="paste-row" id="pasteRow">
-        <summary>No file handy? Paste the text instead</summary>
-        <textarea id="pasteText" placeholder="Paste or type the document's text here…"></textarea>
-        <button class="btn ghost" id="pasteBtn">Add from text</button>
+        <summary>Or paste text from any document</summary>
+        <textarea id="pasteText" placeholder="Paste the document's text here…"></textarea>
+        <button class="btn ghost" id="pasteBtn">Extract from text</button>
       </details>
+
+      <button class="invite-btn" id="inviteBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+        Send upload link to client
+      </button>
 
       <div class="doc-list" id="docList"></div>
       <p class="empty-note" id="emptyNote">Nothing uploaded yet — add the first document to start the case.</p>
     </div>
 
-    <div class="panel">
-      <div class="panel-head">
-        <h2>Case brief</h2>
-        <div class="brief-actions">
-          <button class="btn ghost" id="regenBtn" disabled>Regenerate</button>
+    <div class="right-panels">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Case brief</h2>
+          <div class="brief-actions">
+            <button class="btn ghost" id="regenBtn" disabled>Regenerate</button>
+          </div>
+        </div>
+        <div class="brief-body">
+          <p class="brief-empty" id="briefEmpty">Add a document and the brief writes itself here — so you don't have to read every source file to know where the matter stands.</p>
+          <div class="brief-text" id="briefText" style="display:none;"></div>
+          <div id="bannerHost"></div>
         </div>
       </div>
-      <div class="brief-body">
-        <p class="brief-empty" id="briefEmpty">Add a document and the brief writes itself here — so you don't have to read every source file to know where the matter stands.</p>
-        <div class="brief-text" id="briefText" style="display:none;"></div>
-        <div id="bannerHost"></div>
+
+      <div class="timeline-card">
+        <div class="timeline-head">
+          <h2>Timeline</h2>
+          <button class="timeline-add-btn" id="timelineAddBtn" title="Add timeline entry">+</button>
+        </div>
+        <div class="timeline-body">
+          <p class="timeline-empty" id="timelineEmpty">Add documents to build a timeline automatically.</p>
+          <div class="timeline-items" id="timelineItems"></div>
+        </div>
       </div>
     </div>
 
@@ -282,11 +454,141 @@
   </footer>
 </div>
 
+<!-- Add-document modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <h3>Add a document</h3>
+    <div id="modalContent">
+      <p>How would you like to add a document?</p>
+      <div class="modal-options">
+        <button class="modal-btn" id="uploadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div><strong>Upload file</strong><span>Image, PDF, or Word doc</span></div>
+        </button>
+        <button class="modal-btn" id="cameraBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <div><strong>Take a photo</strong><span>Use your device camera</span></div>
+        </button>
+        <button class="modal-btn" id="pasteModalBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          <div><strong>Paste text</strong><span>Copy from document</span></div>
+        </button>
+      </div>
+    </div>
+    <div id="cameraContent">
+      <video id="cameraPreview" playsinline autoplay></video>
+      <div class="camera-controls">
+        <button class="btn" id="snapBtn">Snap photo</button>
+        <button class="btn ghost" id="cancelCameraBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add timeline entry modal -->
+<div id="timelineFormModal">
+  <div class="timeline-form-box">
+    <h3>Add Timeline Entry</h3>
+    <div class="form-group">
+      <label>Legal Name</label>
+      <input type="text" id="timelineLegalName" placeholder="e.g., Smith v. Johnson">
+    </div>
+    <div class="form-group">
+      <label>Case Hearing Date</label>
+      <input type="date" id="timelineHearingDate">
+    </div>
+    <div class="form-group">
+      <label>Hearing Time</label>
+      <input type="time" id="timelineHearingTime">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="timelineCaseDesc" placeholder="Brief description of the case..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn" id="timelineFormSubmit">Add Entry</button>
+      <button class="btn ghost" id="timelineFormCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send upload link to client modal -->
+<div id="inviteModal">
+  <div class="timeline-form-box invite-form-box">
+    <h3>Send Upload Link to Client</h3>
+    <div class="form-group">
+      <label>Client Name</label>
+      <input type="text" id="inviteClientName" placeholder="e.g., Daniel Brooks">
+    </div>
+    <div class="form-group">
+      <label>Client Phone Number</label>
+      <input type="tel" id="invitePhone" placeholder="e.g., +1 555 123 4567">
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <textarea id="inviteMessage"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Link to include</label>
+      <div class="invite-link-row">
+        <input type="text" id="inviteLink" readonly>
+        <button class="btn ghost" id="inviteCopyLink">Copy</button>
+      </div>
+    </div>
+    <div class="invite-channels">
+      <button class="btn" id="inviteSendSms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Text message
+      </button>
+      <button class="btn ghost" id="inviteSendEmail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+        Email
+      </button>
+    </div>
+    <p class="invite-note">This opens your phone/email app with the message pre-filled so you can review and send it yourself. The link opens this same case-intake page for your client to upload documents.</p>
+    <div class="form-actions" style="margin-top: 12px;">
+      <button class="btn ghost" id="inviteCancel">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating AI case assistant -->
+<button class="chat-fab" id="chatFab">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M9 3.5h6M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M9 16.5c1 .7 5 .7 6 0"/></svg>
+  <span class="chat-fab-label">Need assistance with any case?</span>
+</button>
+
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M9 3.5h6M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M9 16.5c1 .7 5 .7 6 0"/></svg>
+    </div>
+    <div class="chat-header-text">
+      <strong>Case Assistant</strong>
+      <span>Ask anything about this case</span>
+    </div>
+    <button class="chat-close" id="chatClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="assistant-body">
+    <p class="assistant-empty" id="assistantEmpty">Ask me anything about this case, or any general legal question. Add documents to get case-specific answers.</p>
+    <div class="assistant-messages" id="assistantMessages"></div>
+    <div class="assistant-input-box" id="assistantInputBox">
+      <input type="text" id="assistantInput" class="assistant-input" placeholder="Type your question...">
+      <button id="assistantSend" class="assistant-send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   const API_BASE = ''; // same origin as this page; change if you host the backend elsewhere
 
   const fileInput = document.getElementById('fileInput');
+  const cameraInput = document.getElementById('cameraInput');
   const dropzone = document.getElementById('dropzone');
   const docList = document.getElementById('docList');
   const emptyNote = document.getElementById('emptyNote');
@@ -302,15 +604,42 @@
   const pasteBtn = document.getElementById('pasteBtn');
   const pasteRow = document.getElementById('pasteRow');
 
+  const addModal = document.getElementById('addModal');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const cameraBtn = document.getElementById('cameraBtn');
+  const pasteModalBtn = document.getElementById('pasteModalBtn');
+  const snapBtn = document.getElementById('snapBtn');
+  const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+  const modalContent = document.getElementById('modalContent');
+  const cameraContent = document.getElementById('cameraContent');
+  const cameraPreview = document.getElementById('cameraPreview');
+
+  const timelineItems = document.getElementById('timelineItems');
+  const timelineEmpty = document.getElementById('timelineEmpty');
+  const timelineFormModal = document.getElementById('timelineFormModal');
+  const timelineAddBtn = document.getElementById('timelineAddBtn');
+  const timelineFormSubmit = document.getElementById('timelineFormSubmit');
+  const timelineFormCancel = document.getElementById('timelineFormCancel');
+  const timelineLegalName = document.getElementById('timelineLegalName');
+  const timelineHearingDate = document.getElementById('timelineHearingDate');
+  const timelineHearingTime = document.getElementById('timelineHearingTime');
+  const timelineCaseDesc = document.getElementById('timelineCaseDesc');
+
+  let cameraStream = null;
+  let manualTimelineEntries = [];
+  let caseHearingDate = null;
+
   heroCta.addEventListener('click', () => {
     document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
   });
 
   let docs = []; // {id, filename, thumb, status, extracted}
   let briefRunning = false;
+  let briefController = null;
 
   function banner(msg, warn){
     bannerHost.innerHTML = '';
+    if (!msg) return;
     const el = document.createElement('div');
     el.className = 'banner' + (warn ? ' warn' : '');
     el.textContent = msg;
@@ -335,33 +664,130 @@
     return data;
   }
 
-  async function apiBrief(caseName, documents){
+  async function apiBrief(caseName, documents, signal){
     const res = await fetch(API_BASE + '/api/brief', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ caseName, documents }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ caseName, documents }), signal,
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Brief generation failed.');
     return data;
   }
 
-  // ---------- upload wiring ----------
+  async function apiAsk(question, documents, history){
+    const res = await fetch(API_BASE + '/api/ask', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, documents, history }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not get an answer.');
+    return data;
+  }
 
-  fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+  // ---------- Word document text extraction ----------
 
-  ['dragover'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
-  ['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
-  dropzone.addEventListener('drop', e => {
-    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  const DOCX_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+  async function extractDocxText(file){
+    if (typeof window.JSZip === 'undefined'){
+      throw new Error('Word document reader not available — please paste the text instead.');
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await window.JSZip.loadAsync(arrayBuffer);
+    const docXmlFile = zip.file('word/document.xml');
+    if (!docXmlFile){
+      throw new Error('Could not read this Word file — please paste the text instead.');
+    }
+    const xml = await docXmlFile.async('text');
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'application/xml');
+    const textNodes = xmlDoc.getElementsByTagName('w:t');
+    let text = '';
+    for (let i = 0; i < textNodes.length; i++){
+      text += textNodes[i].textContent + ' ';
+    }
+    text = text.trim();
+    if (!text){
+      throw new Error('No readable text found in this Word file — please paste the text instead.');
+    }
+    return text;
+  }
+
+  // ---------- add-document modal ----------
+
+  function openModal(){ addModal.classList.add('open'); }
+  function closeModal(){
+    addModal.classList.remove('open');
+    stopCamera();
+    modalContent.style.display = 'block';
+    cameraContent.style.display = 'none';
+  }
+  function stopCamera(){
+    if (cameraStream){
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+  }
+
+  dropzone.addEventListener('click', openModal);
+
+  uploadBtn.addEventListener('click', () => { closeModal(); fileInput.click(); });
+
+  cameraBtn.addEventListener('click', async () => {
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      cameraPreview.srcObject = cameraStream;
+      modalContent.style.display = 'none';
+      cameraContent.style.display = 'block';
+    } catch (e){
+      alert('Camera access denied or unavailable on this device.');
+    }
   });
 
+  snapBtn.addEventListener('click', () => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = cameraPreview.videoWidth;
+    canvas.height = cameraPreview.videoHeight;
+    ctx.drawImage(cameraPreview, 0, 0);
+    canvas.toBlob(blob => {
+      const file = new File([blob], 'camera-' + Date.now() + '.jpg', { type: 'image/jpeg' });
+      handleFiles([file]);
+      closeModal();
+    }, 'image/jpeg', 0.9);
+  });
+
+  cancelCameraBtn.addEventListener('click', closeModal);
+
+  pasteModalBtn.addEventListener('click', () => {
+    closeModal();
+    pasteRow.open = true;
+    pasteText.focus();
+  });
+
+  fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+  cameraInput.addEventListener('change', () => { handleFiles(cameraInput.files); cameraInput.value = ''; });
+
+  addModal.addEventListener('click', (e) => { if (e.target === addModal) closeModal(); });
+
   function handleFiles(fileList){
-    const files = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
+    const files = Array.from(fileList).filter(f =>
+      f.type.startsWith('image/') ||
+      f.type === 'application/pdf' ||
+      f.type === DOCX_TYPE ||
+      f.name.toLowerCase().endsWith('.docx')
+    );
     files.forEach(addDocument);
   }
 
   pasteBtn.addEventListener('click', () => {
     const text = pasteText.value.trim();
-    if (!text) return;
+    if (!text){
+      alert('Please paste some text from the document first.');
+      return;
+    }
+    if (text.length < 30){
+      alert('Please paste more complete content from the document.');
+      return;
+    }
     addDocumentFromText(text);
     pasteText.value = '';
     pasteRow.open = false;
@@ -372,7 +798,9 @@
   function renderList(){
     docCount.textContent = fmtCount(docs.length);
     emptyNote.style.display = docs.length ? 'none' : 'block';
-    regenBtn.disabled = docs.filter(d => d.status === 'done').length === 0 || briefRunning;
+    const doneCount = docs.filter(d => d.status === 'done').length;
+    regenBtn.disabled = briefRunning ? false : (doneCount === 0);
+    buildTimeline();
   }
 
   function docTypeIcon(){
@@ -405,16 +833,35 @@
         if (t) t.outerHTML = '<img class="doc-thumb" id="thumb-' + id + '" src="' + reader.result + '" alt="">';
       };
       reader.readAsDataURL(file);
-    }
 
-    apiExtractFile(file)
-      .then(result => { doc.status = 'done'; doc.extracted = result; renderCard(doc, card); regenerateBrief(); })
-      .catch(err => {
-        doc.status = 'error';
-        const statusEl = document.getElementById('status-' + id);
-        if (statusEl){ statusEl.className = 'doc-error'; statusEl.textContent = err.message || 'Extraction failed.'; }
-      })
-      .finally(renderList);
+      apiExtractFile(file)
+        .then(result => { doc.status = 'done'; doc.extracted = result; renderCard(doc, card); regenerateBrief(); })
+        .catch(err => {
+          doc.status = 'error';
+          const statusEl = document.getElementById('status-' + id);
+          if (statusEl){ statusEl.className = 'doc-error'; statusEl.textContent = err.message || 'Extraction failed.'; }
+        })
+        .finally(renderList);
+    } else if (file.type === 'application/pdf'){
+      apiExtractFile(file)
+        .then(result => { doc.status = 'done'; doc.extracted = result; renderCard(doc, card); regenerateBrief(); })
+        .catch(err => {
+          doc.status = 'error';
+          const statusEl = document.getElementById('status-' + id);
+          if (statusEl){ statusEl.className = 'doc-error'; statusEl.textContent = err.message || 'Extraction failed.'; }
+        })
+        .finally(renderList);
+    } else if (file.type === DOCX_TYPE || file.name.toLowerCase().endsWith('.docx')){
+      extractDocxText(file)
+        .then(text => apiExtractText(text))
+        .then(result => { doc.status = 'done'; doc.extracted = result; renderCard(doc, card); regenerateBrief(); })
+        .catch(err => {
+          doc.status = 'error';
+          const statusEl = document.getElementById('status-' + id);
+          if (statusEl){ statusEl.className = 'doc-error'; statusEl.textContent = err.message || 'Could not process Word document.'; }
+        })
+        .finally(renderList);
+    }
   }
 
   function addDocumentFromText(text){
@@ -457,33 +904,229 @@
     card.addEventListener('click', () => detail.classList.toggle('open'));
   }
 
+  // ---------- timeline ----------
+
+  function parseDate(dateStr){
+    if (!dateStr || dateStr === 'undated') return null;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatDateForTimeline(date){
+    if (!date) return 'undated';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+
+  function buildTimeline(){
+    const events = [];
+
+    docs.forEach((doc, idx) => {
+      if (doc.extracted && doc.extracted.date && doc.extracted.date !== 'undated'){
+        const date = parseDate(doc.extracted.date);
+        if (date){
+          events.push({
+            date: date,
+            docType: doc.extracted.docType || 'Document',
+            title: doc.extracted.title || 'Document ' + (idx + 1),
+            isManual: false,
+          });
+        }
+      }
+    });
+
+    manualTimelineEntries.forEach(entry => {
+      events.push({
+        date: entry.date,
+        docType: '📋 ' + entry.legalName,
+        title: entry.description || 'Case entry',
+        hearingTime: entry.hearingTime,
+        isManual: true,
+      });
+    });
+
+    if (events.length === 0){
+      timelineEmpty.style.display = 'block';
+      timelineItems.innerHTML = '';
+      return;
+    }
+
+    timelineEmpty.style.display = 'none';
+    events.sort((a, b) => a.date - b.date);
+
+    let html = '';
+    events.forEach(evt => {
+      let daysHtml = '';
+      if (caseHearingDate){
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const hearingDateOnly = new Date(caseHearingDate);
+        hearingDateOnly.setHours(0, 0, 0, 0);
+        const daysRemaining = Math.floor((hearingDateOnly - today) / (1000 * 60 * 60 * 24));
+        daysHtml = '<div class="timeline-days">' + daysRemaining + ' day' + (daysRemaining !== 1 ? 's' : '') + '</div>';
+      }
+
+      let timeHtml = '';
+      if (evt.hearingTime){
+        timeHtml = '<div class="timeline-time">⏰ ' + esc(evt.hearingTime) + '</div>';
+      }
+
+      html +=
+        '<div class="timeline-item">' +
+        '<div class="timeline-dot"></div>' +
+        '<div class="timeline-content">' +
+        '<div class="timeline-header">' +
+        '<div class="timeline-date">' + esc(formatDateForTimeline(evt.date)) + '</div>' +
+        daysHtml +
+        '</div>' +
+        timeHtml +
+        '<div class="timeline-doc">' + esc(evt.docType) + '</div>' +
+        '<div class="timeline-text">' + esc(evt.title) + '</div>' +
+        '</div>' +
+        '</div>';
+    });
+
+    timelineItems.innerHTML = html;
+  }
+
+  timelineAddBtn.addEventListener('click', () => {
+    timelineFormModal.classList.add('open');
+    timelineLegalName.focus();
+  });
+
+  timelineFormSubmit.addEventListener('click', () => {
+    const legalName = timelineLegalName.value.trim();
+    const hearingDate = timelineHearingDate.value;
+    const hearingTime = timelineHearingTime.value;
+    const caseDesc = timelineCaseDesc.value.trim();
+
+    if (!legalName || !hearingDate){
+      alert('Please fill in legal name and case hearing date.');
+      return;
+    }
+
+    const hearingDateObj = new Date(hearingDate);
+    manualTimelineEntries.push({
+      legalName,
+      date: hearingDateObj,
+      hearingTime: hearingTime || '',
+      description: caseDesc,
+    });
+
+    caseHearingDate = hearingDateObj;
+
+    timelineLegalName.value = '';
+    timelineHearingDate.value = '';
+    timelineHearingTime.value = '';
+    timelineCaseDesc.value = '';
+    timelineFormModal.classList.remove('open');
+    buildTimeline();
+  });
+
+  timelineFormCancel.addEventListener('click', () => timelineFormModal.classList.remove('open'));
+  timelineFormModal.addEventListener('click', (e) => { if (e.target === timelineFormModal) timelineFormModal.classList.remove('open'); });
+
+  // ---------- send upload link to client ----------
+
+  const inviteBtn = document.getElementById('inviteBtn');
+  const inviteModal = document.getElementById('inviteModal');
+  const inviteClientName = document.getElementById('inviteClientName');
+  const invitePhone = document.getElementById('invitePhone');
+  const inviteMessage = document.getElementById('inviteMessage');
+  const inviteLink = document.getElementById('inviteLink');
+  const inviteCopyLink = document.getElementById('inviteCopyLink');
+  const inviteSendSms = document.getElementById('inviteSendSms');
+  const inviteSendEmail = document.getElementById('inviteSendEmail');
+  const inviteCancel = document.getElementById('inviteCancel');
+
+  function buildInviteMessage(){
+    const name = inviteClientName.value.trim();
+    const caseName = (caseNameInput.value || 'your case').trim();
+    const link = inviteLink.value;
+    const greeting = name ? ('Hi ' + name + ',') : 'Hi,';
+    return greeting + ' please use this secure link to upload any documents related to ' + caseName + ': ' + link;
+  }
+
+  inviteBtn.addEventListener('click', () => {
+    inviteLink.value = window.location.href;
+    inviteClientName.value = '';
+    invitePhone.value = '';
+    inviteMessage.value = buildInviteMessage();
+    inviteModal.classList.add('open');
+    inviteClientName.focus();
+  });
+
+  inviteCopyLink.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink.value);
+      inviteCopyLink.textContent = 'Copied!';
+      setTimeout(() => { inviteCopyLink.textContent = 'Copy'; }, 1500);
+    } catch (e){
+      inviteLink.select();
+    }
+  });
+
+  inviteSendSms.addEventListener('click', () => {
+    const phone = invitePhone.value.trim().replace(/[^\d+]/g, '');
+    const body = encodeURIComponent(inviteMessage.value || buildInviteMessage());
+    const smsUrl = phone ? ('sms:' + phone + '?body=' + body) : ('sms:?body=' + body);
+    window.location.href = smsUrl;
+  });
+
+  inviteSendEmail.addEventListener('click', () => {
+    const caseName = (caseNameInput.value || 'your case').trim();
+    const subject = encodeURIComponent('Document upload link for ' + caseName);
+    const body = encodeURIComponent(inviteMessage.value || buildInviteMessage());
+    window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+  });
+
+  inviteCancel.addEventListener('click', () => inviteModal.classList.remove('open'));
+  inviteModal.addEventListener('click', (e) => { if (e.target === inviteModal) inviteModal.classList.remove('open'); });
+
   // ---------- case brief ----------
 
-  regenBtn.addEventListener('click', () => regenerateBrief());
+  regenBtn.addEventListener('click', () => {
+    if (briefRunning){ if (briefController) briefController.abort(); }
+    else regenerateBrief();
+  });
 
   async function regenerateBrief(){
     const ready = docs.filter(d => d.status === 'done' && d.extracted);
     if (!ready.length || briefRunning){ renderList(); return; }
     briefRunning = true;
+    regenBtn.textContent = 'Stop';
+    regenBtn.className = 'btn stop';
     renderList();
     statusLine.textContent = 'writing case brief…';
     briefEmpty.style.display = 'none';
     briefText.style.display = 'block';
     briefText.textContent = 'Thinking…';
+    banner(null);
 
     const caseName = (caseNameInput.value || 'this matter').trim();
+    briefController = new AbortController();
+
     try {
-      const { text } = await apiBrief(caseName, ready.map(d => d.extracted));
+      const { text } = await apiBrief(caseName, ready.map(d => d.extracted), briefController.signal);
       briefText.innerHTML = renderBrief(text);
       statusLine.textContent = ready.length + ' of ' + docs.length + ' documents reflected in the brief';
     } catch (e) {
-      briefText.innerHTML = '';
-      briefEmpty.style.display = 'block';
-      briefText.style.display = 'none';
-      banner(e.message || 'Brief generation failed.', true);
-      statusLine.textContent = 'brief generation failed';
+      if (e.name === 'AbortError'){
+        statusLine.textContent = 'stopped';
+      } else {
+        briefText.innerHTML = '';
+        briefEmpty.style.display = 'block';
+        briefText.style.display = 'none';
+        banner(e.message || 'Brief generation failed.', true);
+        statusLine.textContent = 'brief generation failed';
+      }
     }
     briefRunning = false;
+    briefController = null;
+    regenBtn.textContent = 'Regenerate';
+    regenBtn.className = 'btn ghost';
     renderList();
   }
 
@@ -505,6 +1148,78 @@
       }
     });
     return html || '<p>' + esc(text) + '</p>';
+  }
+
+  // ---------- floating AI case assistant ----------
+
+  const chatFab = document.getElementById('chatFab');
+  const chatWindow = document.getElementById('chatWindow');
+  const chatClose = document.getElementById('chatClose');
+  const assistantInput = document.getElementById('assistantInput');
+  const assistantSend = document.getElementById('assistantSend');
+  const assistantMessages = document.getElementById('assistantMessages');
+  const assistantEmpty = document.getElementById('assistantEmpty');
+
+  let assistantHistory = []; // {role, content}
+
+  chatFab.addEventListener('click', () => {
+    chatWindow.classList.add('open');
+    chatFab.classList.add('hidden');
+    assistantInput.focus();
+  });
+
+  chatClose.addEventListener('click', () => {
+    chatWindow.classList.remove('open');
+    chatFab.classList.remove('hidden');
+  });
+
+  assistantSend.addEventListener('click', askAssistant);
+  assistantInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') askAssistant(); });
+
+  async function askAssistant(){
+    const question = assistantInput.value.trim();
+    if (!question) return;
+
+    assistantEmpty.style.display = 'none';
+    assistantInput.value = '';
+    assistantSend.disabled = true;
+
+    const readyDocs = docs.filter(d => d.status === 'done' && d.extracted).map(d => d.extracted);
+
+    const userMsg = document.createElement('div');
+    userMsg.className = 'assistant-message user';
+    userMsg.textContent = question;
+    assistantMessages.appendChild(userMsg);
+    assistantMessages.scrollTop = assistantMessages.scrollHeight;
+
+    const typing = document.createElement('div');
+    typing.className = 'typing-dots';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    assistantMessages.appendChild(typing);
+    assistantMessages.scrollTop = assistantMessages.scrollHeight;
+
+    try {
+      const { text } = await apiAsk(question, readyDocs, assistantHistory);
+
+      assistantMessages.removeChild(typing);
+      assistantHistory.push({ role: 'user', content: question });
+      assistantHistory.push({ role: 'assistant', content: text });
+
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'assistant-message ai';
+      aiMsg.textContent = text;
+      assistantMessages.appendChild(aiMsg);
+      assistantMessages.scrollTop = assistantMessages.scrollHeight;
+    } catch (err){
+      assistantMessages.removeChild(typing);
+      const errMsg = document.createElement('div');
+      errMsg.className = 'assistant-message ai';
+      errMsg.textContent = err.message || 'Could not get an answer — try again.';
+      assistantMessages.appendChild(errMsg);
+    }
+
+    assistantSend.disabled = false;
+    assistantInput.focus();
   }
 
   renderList();
