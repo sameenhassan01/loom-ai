@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Loom AI — case intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --bg: #071633;
+    --bg-raise: #0D2049;
+    --surface: #0B1C42;
+    --surface-sunken: #061330;
+    --ink: #F4F7FC;
+    --ink-muted: #AFC0E0;
+    --ink-faint: #7488B5;
+    --accent: #FFFFFF;
+    --accent-ink: #071633;
+    --flag: #F2A594;
+    --flag-bg: #3A1C22;
+    --good: #9FE0AC;
+    --border: rgba(255,255,255,0.22);
+    --border-strong: rgba(255,255,255,0.45);
+    font-family: 'Inter', -apple-system, sans-serif, system-ui;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.5; }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+  a { color: inherit; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px 70px; }
+
+  /* ---------- HEADER / HERO ---------- */
+
+  header.top { display: flex; align-items: center; justify-content: center; padding: 26px 0; }
+  .mark { display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+  .mark svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .hero { position: relative; padding: 60px 0 70px; max-width: 720px; overflow: visible; }
+
+  .line-bg {
+    position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+    width: 100vw; height: calc(100% + 120px); z-index: 0; overflow: hidden; pointer-events: none;
+    background-image: repeating-linear-gradient(115deg,
+      rgba(255,255,255,0.09) 0px, rgba(255,255,255,0.09) 1px,
+      transparent 1px, transparent 64px);
+    background-size: 300% 300%;
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 92%);
+    mask-image: linear-gradient(to bottom, black, transparent 92%);
+    animation: lineDrift 40s linear infinite;
+  }
+  .line-bg::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 30% 20%, rgba(255,255,255,0.06), transparent 70%);
+  }
+  @keyframes lineDrift { from { background-position: 0% 0%; } to { background-position: 100% 140%; } }
+  @media (prefers-reduced-motion: reduce) { .line-bg { animation: none; } }
+
+  .hero > .eyebrow, .hero > h1, .hero > p.lede, .hero > .hero-cta, .hero > .case-field { position: relative; z-index: 1; }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.3rem); line-height: 1.08; font-weight: 600;
+    letter-spacing: -0.02em; margin: 0 0 18px; color: var(--ink);
+  }
+  .hero p.lede { font-size: 1.02rem; color: var(--ink-muted); max-width: 48ch; margin: 0 0 26px; }
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 0.92rem; font-weight: 600;
+    color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 3px; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .hero-cta:hover { color: var(--accent); border-color: var(--accent); }
+  .hero-cta svg { width: 14px; height: 14px; transition: transform 0.15s ease; }
+  .hero-cta:hover svg { transform: translateY(2px); }
+
+  .case-field {
+    display: flex; align-items: center; gap: 10px; margin-top: 34px;
+    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--ink-faint);
+  }
+  .case-field input {
+    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--ink-muted);
+    background: transparent; border: none; border-bottom: 1px dashed var(--border-strong);
+    padding: 3px 2px; min-width: 220px;
+  }
+  .case-field input:focus { outline: none; border-bottom-color: var(--accent); color: var(--ink); }
+
+  /* ---------- LAYOUT ---------- */
+
+  .layout {
+    display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start;
+    border-top: 1px solid var(--border); padding-top: 40px;
+  }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .panel-head {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  }
+  .panel-head h2 { font-weight: 600; font-size: 1rem; margin: 0; }
+  .panel-head .count { font-size: 0.76rem; color: var(--ink-faint); font-family: 'Space Mono', monospace; }
+
+  /* ---------- INTAKE ---------- */
+
+  .dropzone {
+    margin: 16px 20px 6px; border: 1.5px dashed var(--border-strong); border-radius: 6px;
+    padding: 22px 16px; text-align: center; cursor: pointer; background: var(--surface-sunken);
+    transition: border-color 0.15s ease, background 0.15s ease; display: block;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: #0A1638; }
+  .dropzone svg { width: 24px; height: 24px; margin-bottom: 8px; opacity: 0.55; }
+  .dropzone p { margin: 0; font-size: 0.86rem; color: var(--ink-muted); }
+  .dropzone p.primary { color: var(--ink); font-weight: 500; margin-bottom: 3px; }
+  .dropzone input { display: none; }
+
+  .paste-row { margin: 4px 20px 16px; }
+  .paste-row summary { font-size: 0.82rem; color: var(--ink-muted); cursor: pointer; padding: 6px 0; list-style: none; }
+  .paste-row summary::-webkit-details-marker { display: none; }
+  .paste-row summary:hover { color: var(--ink); }
+  .paste-row summary::before { content: "＋ "; color: var(--accent); }
+  .paste-row[open] summary::before { content: "－ "; }
+  .paste-row textarea {
+    width: 100%; min-height: 90px; resize: vertical; margin-top: 8px;
+    background: var(--surface-sunken); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 5px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 0.85rem;
+  }
+  .paste-row textarea:focus { outline: none; border-color: var(--accent); }
+  .paste-row .btn { margin-top: 8px; }
+
+  .doc-list { padding: 6px 12px 16px; display: grid; gap: 10px; }
+
+  .doc-card {
+    display: grid; grid-template-columns: 50px 1fr; gap: 12px;
+    padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg-raise); cursor: pointer;
+    animation: fadein 0.35s ease;
+  }
+  @keyframes fadein { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+  .doc-thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; border: 1px solid var(--border); background: var(--surface-sunken); }
+  .doc-thumb.placeholder { display: flex; align-items: center; justify-content: center; }
+  .doc-thumb.placeholder svg { width: 18px; height: 18px; opacity: 0.4; }
+
+  .doc-main { min-width: 0; }
+  .doc-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .doc-type-badge {
+    font-family: 'Space Mono', monospace; font-size: 0.66rem; color: var(--accent);
+    border: 1px solid var(--border-strong); border-radius: 3px; padding: 1px 6px; white-space: nowrap;
+  }
+  .doc-flag-badge {
+    font-family: 'Space Mono', monospace; font-size: 0.66rem; color: var(--flag);
+    background: var(--flag-bg); border-radius: 3px; padding: 1px 6px; white-space: nowrap;
+  }
+  .doc-title { font-size: 0.88rem; font-weight: 500; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-sub { font-size: 0.76rem; color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-reading { font-size: 0.8rem; color: var(--ink-muted); font-style: italic; }
+  .doc-error { font-size: 0.8rem; color: var(--flag); }
+
+  .doc-detail {
+    grid-column: 1 / -1; border-top: 1px dashed var(--border); margin-top: 10px; padding-top: 10px;
+    font-size: 0.84rem; display: none; color: var(--ink-muted);
+  }
+  .doc-detail.open { display: block; }
+  .doc-detail p { margin: 0 0 8px; }
+  .doc-detail .dk { color: var(--ink-faint); font-size: 0.7rem; font-family: 'Space Mono', monospace; display: block; margin-bottom: 2px; }
+  .doc-detail ul { margin: 0 0 8px; padding-left: 18px; }
+  .doc-detail li { margin-bottom: 3px; }
+
+  .empty-note { padding: 8px 8px 20px; font-size: 0.85rem; color: var(--ink-faint); text-align: center; }
+
+  /* ---------- BRIEF ---------- */
+
+  .brief-body { padding: 22px 24px 26px; }
+  .brief-empty { color: var(--ink-faint); font-size: 0.95rem; padding: 10px 0 4px; }
+
+  .brief-text { font-size: 0.96rem; color: var(--ink-muted); }
+  .brief-text h3 { font-weight: 600; font-size: 0.98rem; margin: 22px 0 8px; color: var(--ink); }
+  .brief-text h3:first-child { margin-top: 0; }
+  .brief-text p { margin: 0 0 10px; }
+  .brief-text ul { margin: 0 0 10px; padding-left: 20px; }
+  .brief-text li { margin-bottom: 5px; }
+  .brief-text .flag-line { color: var(--flag); }
+
+  .brief-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem;
+    border-radius: 4px; padding: 7px 13px; cursor: pointer;
+    background: var(--ink); color: var(--accent-ink); border: none;
+  }
+  .btn.ghost { background: transparent; color: var(--ink-muted); border: 1px solid var(--border-strong); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn:focus-visible, .dropzone:focus-visible, .hero-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .banner {
+    margin: 18px 0 0; padding: 11px 14px; border-radius: 5px; font-size: 0.83rem;
+    border: 1px solid var(--border-strong); background: var(--surface-sunken); color: var(--ink-muted);
+  }
+  .banner.warn { border-color: var(--flag); color: var(--flag); background: var(--flag-bg); }
+
+  footer {
+    padding: 34px 0 10px; color: var(--ink-faint); font-size: 0.76rem;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    font-family: 'Space Mono', monospace;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="var(--accent)" stroke-width="1.4"/><path d="M8 9h8M8 13h8M8 17h5" stroke="var(--accent)" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Loom AI
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="line-bg" aria-hidden="true"></div>
+    <div class="eyebrow">AI-powered intake</div>
+    <h1>Read every case at the speed of AI.</h1>
+    <p class="lede">Upload a document — photo or PDF — and Loom AI reads it, files it, and rewrites the case brief, so you walk into the room already knowing where the matter stands.</p>
+    <button class="hero-cta" id="heroCta">Start a case <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button>
+    <div class="case-field">
+      matter&nbsp;/&nbsp;<input id="caseName" type="text" value="Untitled matter" spellcheck="false">
+    </div>
+  </section>
+
+  <div class="layout" id="demo">
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Intake</h2>
+        <span class="count" id="docCount">0 documents</span>
+      </div>
+
+      <label class="dropzone" id="dropzone" tabindex="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+        <p class="primary">Add a document</p>
+        <p>Drop a photo or PDF, or click to choose one</p>
+        <input id="fileInput" type="file" accept="image/*,application/pdf" multiple>
+      </label>
+
+      <details class="paste-row" id="pasteRow">
+        <summary>No file handy? Paste the text instead</summary>
+        <textarea id="pasteText" placeholder="Paste or type the document's text here…"></textarea>
+        <button class="btn ghost" id="pasteBtn">Add from text</button>
+      </details>
+
+      <div class="doc-list" id="docList"></div>
+      <p class="empty-note" id="emptyNote">Nothing uploaded yet — add the first document to start the case.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Case brief</h2>
+        <div class="brief-actions">
+          <button class="btn ghost" id="regenBtn" disabled>Regenerate</button>
+        </div>
+      </div>
+      <div class="brief-body">
+        <p class="brief-empty" id="briefEmpty">Add a document and the brief writes itself here — so you don't have to read every source file to know where the matter stands.</p>
+        <div class="brief-text" id="briefText" style="display:none;"></div>
+        <div id="bannerHost"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>loom ai — live case intake</span>
+    <span id="statusLine">idle</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const API_BASE = ''; // same origin as this page; change if you host the backend elsewhere
+
+  const fileInput = document.getElementById('fileInput');
+  const dropzone = document.getElementById('dropzone');
+  const docList = document.getElementById('docList');
+  const emptyNote = document.getElementById('emptyNote');
+  const docCount = document.getElementById('docCount');
+  const briefEmpty = document.getElementById('briefEmpty');
+  const briefText = document.getElementById('briefText');
+  const regenBtn = document.getElementById('regenBtn');
+  const bannerHost = document.getElementById('bannerHost');
+  const statusLine = document.getElementById('statusLine');
+  const caseNameInput = document.getElementById('caseName');
+  const heroCta = document.getElementById('heroCta');
+  const pasteText = document.getElementById('pasteText');
+  const pasteBtn = document.getElementById('pasteBtn');
+  const pasteRow = document.getElementById('pasteRow');
+
+  heroCta.addEventListener('click', () => {
+    document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  let docs = []; // {id, filename, thumb, status, extracted}
+  let briefRunning = false;
+
+  function banner(msg, warn){
+    bannerHost.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'banner' + (warn ? ' warn' : '');
+    el.textContent = msg;
+    bannerHost.appendChild(el);
+  }
+
+  async function apiExtractFile(file){
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch(API_BASE + '/api/extract', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Extraction failed.');
+    return data;
+  }
+
+  async function apiExtractText(text){
+    const res = await fetch(API_BASE + '/api/extract-text', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Extraction failed.');
+    return data;
+  }
+
+  async function apiBrief(caseName, documents){
+    const res = await fetch(API_BASE + '/api/brief', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ caseName, documents }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Brief generation failed.');
+    return data;
+  }
+
+  // ---------- upload wiring ----------
+
+  fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+
+  ['dragover'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+  dropzone.addEventListener('drop', e => {
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  });
+
+  function handleFiles(fileList){
+    const files = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
+    files.forEach(addDocument);
+  }
+
+  pasteBtn.addEventListener('click', () => {
+    const text = pasteText.value.trim();
+    if (!text) return;
+    addDocumentFromText(text);
+    pasteText.value = '';
+    pasteRow.open = false;
+  });
+
+  function fmtCount(n){ return n + (n === 1 ? ' document' : ' documents'); }
+
+  function renderList(){
+    docCount.textContent = fmtCount(docs.length);
+    emptyNote.style.display = docs.length ? 'none' : 'block';
+    regenBtn.disabled = docs.filter(d => d.status === 'done').length === 0 || briefRunning;
+  }
+
+  function docTypeIcon(){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v5h5"/></svg>';
+  }
+
+  function makeCard(id){
+    const card = document.createElement('div');
+    card.className = 'doc-card';
+    card.id = 'card-' + id;
+    card.innerHTML =
+      '<div class="doc-thumb placeholder" id="thumb-' + id + '">' + docTypeIcon() + '</div>' +
+      '<div class="doc-main"><div class="doc-reading" id="status-' + id + '">Reading document…</div></div>' +
+      '<div class="doc-detail" id="detail-' + id + '"></div>';
+    docList.prepend(card);
+    return card;
+  }
+
+  function addDocument(file){
+    const id = 'd' + Math.random().toString(36).slice(2, 10);
+    const doc = { id, filename: file.name, thumb: null, status: 'reading', extracted: null };
+    docs.push(doc);
+    const card = makeCard(id);
+    renderList();
+
+    if (file.type.startsWith('image/')){
+      const reader = new FileReader();
+      reader.onload = () => {
+        const t = document.getElementById('thumb-' + id);
+        if (t) t.outerHTML = '<img class="doc-thumb" id="thumb-' + id + '" src="' + reader.result + '" alt="">';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    apiExtractFile(file)
+      .then(result => { doc.status = 'done'; doc.extracted = result; renderCard(doc, card); regenerateBrief(); })
+      .catch(err => {
+        doc.status = 'error';
+        const statusEl = document.getElementById('status-' + id);
+        if (statusEl){ statusEl.className = 'doc-error'; statusEl.textContent = err.message || 'Extraction failed.'; }
+      })
+      .finally(renderList);
+  }
+
+  function addDocumentFromText(text){
+    const id = 'd' + Math.random().toString(36).slice(2, 10);
+    const doc = { id, filename: 'pasted text', thumb: null, status: 'reading', extracted: null };
+    docs.push(doc);
+    const card = makeCard(id);
+    renderList();
+
+    apiExtractText(text)
+      .then(result => { doc.status = 'done'; doc.extracted = result; renderCard(doc, card); regenerateBrief(); })
+      .catch(err => {
+        doc.status = 'error';
+        const statusEl = document.getElementById('status-' + id);
+        if (statusEl){ statusEl.className = 'doc-error'; statusEl.textContent = err.message || 'Extraction failed.'; }
+      })
+      .finally(renderList);
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  function renderCard(doc, card){
+    const x = doc.extracted || {};
+    const main = card.querySelector('.doc-main');
+    const flagBadge = (x.flags && x.flags.length) ? '<span class="doc-flag-badge">' + x.flags.length + ' flag' + (x.flags.length > 1 ? 's' : '') + '</span>' : '';
+    main.innerHTML =
+      '<div class="doc-status-row"><span class="doc-type-badge">' + esc(x.docType || 'Document') + '</span>' + flagBadge + '</div>' +
+      '<p class="doc-title">' + esc(x.title || doc.filename) + '</p>' +
+      '<p class="doc-sub">' + esc(x.date || 'undated') + '</p>';
+
+    const detail = document.getElementById('detail-' + doc.id);
+    let html = '<p>' + esc(x.summary || '') + '</p>';
+    if (x.parties && x.parties.length) html += '<span class="dk">parties</span><p>' + x.parties.map(esc).join(', ') + '</p>';
+    if (x.keyFacts && x.keyFacts.length) html += '<span class="dk">key facts</span><ul>' + x.keyFacts.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul>';
+    if (x.flags && x.flags.length) html += '<span class="dk">flagged</span><ul>' + x.flags.map(f => '<li class="flag-line">' + esc(f) + '</li>').join('') + '</ul>';
+    detail.innerHTML = html;
+
+    card.addEventListener('click', () => detail.classList.toggle('open'));
+  }
+
+  // ---------- case brief ----------
+
+  regenBtn.addEventListener('click', () => regenerateBrief());
+
+  async function regenerateBrief(){
+    const ready = docs.filter(d => d.status === 'done' && d.extracted);
+    if (!ready.length || briefRunning){ renderList(); return; }
+    briefRunning = true;
+    renderList();
+    statusLine.textContent = 'writing case brief…';
+    briefEmpty.style.display = 'none';
+    briefText.style.display = 'block';
+    briefText.textContent = 'Thinking…';
+
+    const caseName = (caseNameInput.value || 'this matter').trim();
+    try {
+      const { text } = await apiBrief(caseName, ready.map(d => d.extracted));
+      briefText.innerHTML = renderBrief(text);
+      statusLine.textContent = ready.length + ' of ' + docs.length + ' documents reflected in the brief';
+    } catch (e) {
+      briefText.innerHTML = '';
+      briefEmpty.style.display = 'block';
+      briefText.style.display = 'none';
+      banner(e.message || 'Brief generation failed.', true);
+      statusLine.textContent = 'brief generation failed';
+    }
+    briefRunning = false;
+    renderList();
+  }
+
+  function renderBrief(text){
+    if (!text) return '';
+    const blocks = text.split(/(?=^### )/m).filter(Boolean);
+    let html = '';
+    blocks.forEach(block => {
+      const m = block.match(/^### (.+)\n?([\s\S]*)$/);
+      const heading = m ? m[1].trim() : '';
+      const body = (m ? m[2] : block).trim();
+      if (heading) html += '<h3>' + esc(heading) + '</h3>';
+      const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
+      const isList = lines.length > 1 && lines.every(l => /^[-*]\s/.test(l));
+      if (isList){
+        html += '<ul>' + lines.map(l => '<li>' + esc(l.replace(/^[-*]\s/, '')) + '</li>').join('') + '</ul>';
+      } else {
+        html += lines.map(l => '<p>' + esc(l.replace(/^[-*]\s/, '')) + '</p>').join('');
+      }
+    });
+    return html || '<p>' + esc(text) + '</p>';
+  }
+
+  renderList();
+})();
+</script>
+
+</body>
+</html>
